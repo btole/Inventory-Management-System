@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Stock Summary Report</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Category</th>
+            <th>Total Quantity</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entry in summary %}
+        <tr>
+            <td>{{ entry.category__name }}</td>
+            <td>{{ entry.total_quantity }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="2">No data available.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

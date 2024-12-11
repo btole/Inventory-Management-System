@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Dashboard</h1>
+
+<a href="{% url 'stock-summary-report' %}" class="btn btn-info mb-3">Stock Summary Report</a>
+<a href="{% url 'low-stock-report' %}" class="btn btn-warning mb-3">Low Stock Report</a>
+<a href="{% url 'inventory-movement-report' %}" class="btn btn-success mb-3">Inventory Movement Report</a>
+<div class="modal fade" id="stockSummaryModal" tabindex="-1" aria-labelledby="stockSummaryModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="stockSummaryModalLabel">Stock Summary Report</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Total Quantity</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in summary %}
+                <tr>
+                    <td>{{ entry.category__name }}</td>
+                    <td>{{ entry.total_quantity }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2">No data available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Button to Open the Modal for Stock Summary Report -->
+<a href="#" class="btn btn-info mb-3" data-bs-toggle="modal" data-bs-target="#stockSummaryModal">View Stock Summary</a>
+<form method="get" class="mb-3">
+    <input type="text" name="search" value="{{ search_query }}" placeholder="Search by item name" class="form-control mb-2" />
+
+    <label for="category">Category: </label>
+    <select name="category" class="form-control mb-2">
+        <option value="">All Categories</option>
+        {% for category in categories %}
+            <option value="{{ category.id }}" {% if category.id == category_filter %}selected{% endif %}>{{ category.name }}</option>
+        {% endfor %}
+    </select>
+
+    <label for="low_stock">Low Stock: </label>
+    <select name="low_stock" class="form-control mb-2">
+        <option value="false">No</option>
+        <option value="true" {% if low_stock_filter == 'true' %}selected{% endif %}>Yes</option>
+    </select>
+
+    <button type="submit" class="btn btn-primary">Apply Filters</button>
+</form>
+<!-- Display low inventory warnings -->
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<!-- Inventory Table -->
+<h2>Your Inventory</h2>
+<a href="{% url 'add-item' %}" class="btn btn-primary mb-3">Add New Item</a>
+<a href="{% url 'import-inventory' %}" class="btn btn-info mb-3">Import Inventory</a>
+
+<!-- Export Inventory Button -->
+<a href="{% url 'export-inventory' %}" class="btn btn-success mb-3">Export Inventory</a>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th>Category</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr class="{% if item.quantity <= LOW_QUANTITY %}table-danger{% endif %}">
+            <td>{{ forloop.counter }}</td>
+            <td>{{ item.name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.category }}</td>
+            <td>
+                <a href="{% url 'edit-item' item.id %}" class="btn btn-warning btn-sm">Edit</a>
+                <a href="{% url 'delete-item' item.id %}" class="btn btn-danger btn-sm">Delete</a>
+                <a href="{% url 'export-inventory' %}" class="btn btn-success">Export Inventory</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
